@@ -12,7 +12,7 @@
   (= 0 (length str)))
 
 (defun id (input)
-  (car (last (split (car (split input ":")) " "))))
+  (parse-integer (car (last (split (car (split input ":")) " ")))))
 
 (defun winning (input)
   (mapcar #'parse-integer
@@ -66,13 +66,6 @@
 (defun nexts (start nb)
   (range (1+ start) (+ start nb 1)))
 
-;(defun accumulate (ids founds)
-;  (let ((count 0))
-;    (dolist (i ids)
-;      (let ((result (nth (1- i) founds))
-;            (toadd (nexts (1+ i) result)))
-;        ))))
-
 (defun read-lines (lines)
   (let ((input (read-line *standard-input* nil)))
     (if input
@@ -85,8 +78,13 @@
 (defun solve-02 (lines)
   (let ((ids (mapcar #'id lines))
         (founds (mapcar #'nb-found lines)))
-    ids
-    founds))
+    (labels ((f (i lst)
+               (let ((r (nexts i (nth (1- i) founds))))
+                 (mapcar #'f r (make-list (length r)
+                                          :initial-element (append r lst)))))
+             (g (i)
+               (cons i (f i '()))))
+      (mapcar #'g ids))))
 
 (defun process (file solver)
   (with-open-file (*standard-input* file)
