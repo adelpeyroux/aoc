@@ -75,16 +75,24 @@
 (defun solve-01 (lines)
   (reduce #'+ (mapcar #'compute-result lines)))
 
+; thank you fellow stranger
+; from: Donnie Cameron
+; url: https://stackoverflow.com/questions/2680864/how-to-remove-nested-parentheses-in-lisp
+(defun flatten (l)
+  (cond ((null l) nil)
+        ((atom l) (list l))
+        (t (loop for a in l appending (flatten a)))))
+
 (defun solve-02 (lines)
   (let ((ids (mapcar #'id lines))
         (founds (mapcar #'nb-found lines)))
-    (labels ((f (i lst)
+    (labels ((f (i)
                (let ((r (nexts i (nth (1- i) founds))))
-                 (mapcar #'f r (make-list (length r)
-                                          :initial-element (append r lst)))))
+                 (when (< 0 (length r))
+                   (append r (mapcar #'f r )))))
              (g (i)
-               (cons i (f i '()))))
-      (mapcar #'g ids))))
+               (cons i (f i))))
+      (length (remove-if-not #'numberp (flatten (mapcar #'g ids)))))))
 
 (defun process (file solver)
   (with-open-file (*standard-input* file)
